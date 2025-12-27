@@ -9,22 +9,21 @@ addon "svm" {
 
 action "deploy_vault_program" "svm::deploy_program" {
     description = "Deploy vault_program program"
-    program = svm::get_program_from_anchor_project("vault_program") 
+    program = svm::get_program_from_anchor_project("vault_program/programs/vault_program") 
     authority = signer.authority
     payer = signer.payer
 }
 
 action "deploy_bonsol_program" "svm::deploy_program" {
     description = "Deploy bonsol program"
-    program = svm::get_program_from_native_project("bonsol", "../bonsol/target/deploy/bonsol-keypair.json", null, "../bonsol/target/deploy/bonsol.so")
+    program = svm::get_program_from_native_project("bonsol", "bonsol/target/deploy/bonsol-keypair.json", null, "../bonsol/target/deploy/bonsol.so")
     authority = signer.authority
     payer = signer.payer
 }
 
 action "deploy_example_callback_program" "svm::deploy_program" {
     description = "Deploy example callback program"
-    program = svm::get_program_from_native_project("bonsol", "../bonsol/target/deploy/callback_example.json", null, "../bonsol/target/deploy/callback_example.so")
+    program = svm::get_program_from_native_project("bonsol", "bonsol/target/deploy/callback_example-keypair.json", null, "../bonsol/target/deploy/callback_example.so")
     authority = signer.authority
     payer = signer.payer
 }
-
