@@ -1,53 +1,24 @@
 "use client"
 
 import { Shield, Upload, List, Info } from "lucide-react"
-// import { useConnection, useWallet } from "@solana/wallet-adapter-react"
-// import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-// import { useEffect, useState } from "react"
-// import { LAMPORTS_PER_SOL } from "@solana/web3.js"
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 export function Navbar() {
-  // ===============================================
-  // CALLBACK FUNCTION: HOME BUTTON
-  // ----ADD HOME BUTTON CODE HERE----
-  // ===============================================
   const handleHomeClick = () => {
     alert("Home button clicked")
-    // Add your home navigation logic here
   }
 
-  // ===============================================
-  // CALLBACK FUNCTION: UPLOAD BUTTON
-  // ----ADD UPLOAD CODE HERE----
-  // ===============================================
   const handleUploadClick = () => {
     alert("Upload button clicked")
-    // Add your document upload logic here
   }
 
-  // ===============================================
-  // CALLBACK FUNCTION: VIEW LIST BUTTON
-  // ----ADD VIEW LIST CODE HERE----
-  // ===============================================
   const handleViewListClick = () => {
     alert("View List button clicked")
-    // Add your view document list logic here
   }
 
-  // ===============================================
-  // CALLBACK FUNCTION: ABOUT US BUTTON
-  // ----ADD ABOUT US CODE HERE----
-  // ===============================================
   const handleAboutUsClick = () => {
     alert("About Us button clicked")
-    // Add your about us page navigation logic here
   }
-
-  // ===============================================
-  // CONNECT BUTTON
-  // ----ADD CONNECT CODE HERE----
-  // ===============================================
-  
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
@@ -92,7 +63,10 @@ export function Navbar() {
             </button>
           </div>
 
-          {/* Connect Button */}
+          {/* Wallet Connect Button */}
+          <div className="wallet-button-container">
+            <WalletMultiButton />
+          </div>
         </div>
       </div>
     </nav>

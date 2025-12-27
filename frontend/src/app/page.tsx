@@ -26,7 +26,6 @@ export default function Home() {
   return (
     <main className="relative">
       <Navbar />
-      <WalletMultiButton />
       <HeroSection />
       <FeatureCards />
     </main>

@@ -1,3 +1,4 @@
+@import '@solana/wallet-adapter-react-ui/styles.css';
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -88,4 +89,37 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Wallet button styling */
+.wallet-button-container {
+  position: relative;
+  z-index: 100;
+}
+
+.wallet-button-container button {
+  background: transparent !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-radius: 0.5rem !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  transition: all 0.2s !important;
+}
+
+.wallet-button-container button:hover {
+  background: hsl(var(--accent)) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+
+/* Ensure wallet modal appears on top */
+.wallet-adapter-modal-wrapper {
+  z-index: 9999 !important;
+}
+
+.wallet-adapter-modal-overlay {
+  z-index: 9998 !important;
 }
