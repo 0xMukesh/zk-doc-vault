@@ -1,9 +1,12 @@
-"use client";
+"use client"
 
+import { Navbar } from "@/components/navbar"
+import { HeroSection } from "@/components/hero-section"
+import { FeatureCards } from "@/components/feature-cards"
+import { useEffect, useState } from 'react'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { useEffect, useState } from 'react';
-import { WalletButton } from '@/components/WalletButton';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 export default function Home() {
   const { connection } = useConnection();
@@ -12,9 +15,8 @@ export default function Home() {
 
   useEffect(() => {
     if (publicKey) {
-      // Fetch wallet balance
-      connection.getBalance(publicKey).then((bal) => {
-        setBalance(bal / LAMPORTS_PER_SOL);
+      connection.getBalance(publicKey).then((balance) => {
+        setBalance(balance / LAMPORTS_PER_SOL);
       });
     } else {
       setBalance(null);
@@ -22,33 +24,11 @@ export default function Home() {
   }, [publicKey, connection]);
 
   return (
-    <main className="min-h-screen p-8">
-      <WalletButton />
-      
-      <div className="max-w-4xl mx-auto mt-16">
-        <h1 className="text-4xl font-bold mb-8">Solana Wallet Integration</h1>
-        
-        {publicKey ? (
-          <div className="bg-gray-100 p-6 rounded-lg">
-            <p className="mb-2">
-              <strong>Connected Wallet:</strong>
-            </p>
-            <p className="font-mono text-sm break-all mb-4">
-              {publicKey.toString()}
-            </p>
-            
-            {balance !== null && (
-              <p>
-                <strong>Balance:</strong> {balance.toFixed(4)} SOL
-              </p>
-            )}
-          </div>
-        ) : (
-          <p className="text-gray-600">
-            Connect your wallet to get started
-          </p>
-        )}
-      </div>
+    <main className="relative">
+      <Navbar />
+      <WalletMultiButton />
+      <HeroSection />
+      <FeatureCards />
     </main>
-  );
+  )
 }
