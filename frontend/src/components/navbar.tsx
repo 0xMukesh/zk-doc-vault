@@ -2,22 +2,23 @@
 
 import { Shield, Upload, List, Info } from "lucide-react"
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { useRouter } from "next/navigation"
 
 export function Navbar() {
-  const handleHomeClick = () => {
-    alert("Home button clicked")
-  }
+  const router = useRouter()
 
-  const handleUploadClick = () => {
-    alert("Upload button clicked")
+  const handleHomeClick = () => {
+    console.log("Home button clicked")
+    router.push("/")
   }
 
   const handleViewListClick = () => {
-    alert("View List button clicked")
+    console.log("View List button clicked")
+    router.push("/vault-list")
   }
 
   const handleAboutUsClick = () => {
-    alert("About Us button clicked")
+    alert("About Us:\nAbhinav Challa\nSamyak Jain\nMukesh Reddy")
   }
 
   return (
@@ -40,13 +41,13 @@ export function Navbar() {
             >
               Home
             </button>
-            <button
+            {/* <button
               onClick={handleUploadClick}
               className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               <Upload className="w-4 h-4" />
               Upload
-            </button>
+            </button> */}
             <button
               onClick={handleViewListClick}
               className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
