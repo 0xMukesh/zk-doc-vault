@@ -1,29 +1,27 @@
-use gjson::Kind;
-use risc0_zkvm::{
-    guest::{env, sha::Impl},
-    sha::Sha256,
-};
+#![no_main]
+
+use risc0_zkvm::guest::env;
+
+risc0_zkvm::guest::entry!(main);
 
 fn main() {
-    let mut public1 = Vec::new();
-    env::read_slice(&mut public1);
-    let publici1 = String::from_utf8(public1).unwrap();
+    // 1. Read public input (JSON string)
+    let public_input: String = env::read();
 
-    let mut private2 = Vec::new();
-    env::read_slice(&mut private2);
-    let privatei2 = String::from_utf8(private2).unwrap();
+    // 2. Read private input (attestation string)
+    let private_input: String = env::read();
 
-    let valid = gjson::valid(&publici1);
-    let mut res = 0;
+    // 3. Validate and process inputs
+    let valid = gjson::valid(&public_input);
+    let mut res: u8 = 0;
+
     if valid {
-        let val = gjson::get(&publici1, "attestation");
-        if val.kind() == Kind::String && val.str() == privatei2 {
+        let val = gjson::get(&public_input, "attestation");
+        if val.kind() == gjson::Kind::String && val.str() == private_input {
             res = 1;
         }
     }
 
-    let digest = Impl::hash_bytes(&[publici1.as_bytes(), privatei2.as_bytes()].concat());
-    env::commit_slice(digest.as_bytes());
-
-    env::commit_slice(&[res]);
+    // 4. Commit the result
+    env::commit(&res);
 }
