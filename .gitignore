@@ -1,0 +1,5 @@
+bonsol
+node_modules
+build
+.next
+.env*
