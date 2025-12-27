@@ -5,6 +5,7 @@ use crate::constants::MAX_NAME_LEN;
 #[account]
 #[derive(InitSpace)]
 pub struct Vault {
+    pub vault_id: Pubkey,
     pub owner: Pubkey,
     #[max_len(MAX_NAME_LEN)]
     pub name: String,
