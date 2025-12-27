@@ -1,0 +1,17 @@
+
+[package]
+name = "zk_program"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.zkprogram]
+input_order = ["Public"]
+
+[workspace]
+
+[dependencies]
+risc0-zkvm = {version = "2.3.1", default-features = false, features = ["std"]}
+
+[dependencies.sha2]
+git = "https://github.com/risc0/RustCrypto-hashes"
+tag = "sha2-v0.10.6-risczero.0"
