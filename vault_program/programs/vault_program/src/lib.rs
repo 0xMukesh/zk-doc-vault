@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 
 pub mod constants;
+pub mod errors;
 pub mod instructions;
 pub mod state;
 
@@ -18,5 +19,13 @@ pub mod vault_program {
         name: String,
     ) -> Result<()> {
         process_create_user_vault(ctx, vault_id, name)
+    }
+
+    pub fn request_proof(
+        ctx: Context<RequestProof>,
+        execution_id: String,
+        proof_inputs: ProofInputs,
+    ) -> Result<()> {
+        process_request_proof(ctx, execution_id, proof_inputs)
     }
 }

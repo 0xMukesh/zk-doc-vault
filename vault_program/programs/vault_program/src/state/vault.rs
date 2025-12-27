@@ -10,6 +10,8 @@ pub struct Vault {
     #[max_len(MAX_NAME_LEN)]
     pub name: String,
     pub document_count: u64,
+    pub execution_request_id: [u8; 32],
+    pub pending_verification: bool,
     pub created_at: i64,
     pub updated_at: i64,
     pub bump: u8,
