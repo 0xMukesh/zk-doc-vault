@@ -1,0 +1,18 @@
+addon "svm" {
+    rpc_api_url = input.rpc_api_url
+    network_id = input.network_id
+}
+
+action "deploy_vault_program" "svm::deploy_program" {
+    description = "Deploy vault_program program"
+    program = svm::get_program_from_anchor_project("vault_program") 
+    authority = signer.authority
+    payer = signer.payer
+}
+
+action "deploy_bonsol_program" "svm::deploy_program" {
+    description = "Deploy bonsol program"
+    program = svm::get_program_from_native_project("bonsol", "../bonsol/target/deploy/bonsol-keypair.json", null, "../bonsol/target/deploy/bonsol.so") 
+    authority = signer.authority
+    payer = signer.payer
+}
