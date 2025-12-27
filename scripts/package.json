@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "pinata": "^2.5.2"
+  },
+  "devDependencies": {
+    "bun-types": "^1.3.5",
+    "dotenv": "^17.2.3",
+    "envalid": "^8.1.1"
+  }
+}
