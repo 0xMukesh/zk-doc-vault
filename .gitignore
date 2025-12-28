@@ -1,5 +1,7 @@
 bonsol
 node_modules
 build
+target
 .next
+.surfpool
 .env*

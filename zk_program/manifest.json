@@ -1,0 +1,11 @@
+{
+  "name": "zk_program",
+  "binaryPath": "/home/mukesh/dev/zk-doc-vault/zk_program/target/riscv32im-risc0-zkvm-elf/docker/zk_program.bin",
+  "imageId": "0ecec86c9573fd5ec277866ebc22a654e4e68593df1512ce5bbbbef39c43d3a3",
+  "inputOrder": [
+    "Public",
+    "Private"
+  ],
+  "signature": "3SReh9PJ8CeZfs9MDzBvYkh14U1nfKJUhUBY4Esfqgd5DHQ9Wo7KpVnDmUTRKqhEGrqAUtRxYAwfUdAYcNgTuvfP",
+  "size": 250784
+}

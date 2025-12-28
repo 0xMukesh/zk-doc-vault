@@ -1,0 +1,20 @@
+[package]
+name = "zk_program"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[package.metadata.zkprogram]
+input_order = ["Public", "Private"]
+
+[dependencies]
+gjson = { version = "0.8", default-features = false }
+risc0-zkvm = { git = "https://github.com/anagrambuild/risc0", branch = "v1.0.1-bonsai-fix", default-features = false, features = [
+  "std",
+] }
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+
+[profile.release]
+opt-level = 3
+lto = true
