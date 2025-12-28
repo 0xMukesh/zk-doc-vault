@@ -41,7 +41,11 @@ pub mod vault_program {
         )
     }
 
-    // FIXME: dead code, remove later on
+    pub fn delete_document(ctx: Context<DeleteDocument>) -> Result<()> {
+        process_delete_document(ctx)
+    }
+
+    // NOTE: dead code, remove later on
     // bonsol isn't used now, due to some issue with groth16 verifier (not sure)
     // pub fn request_proof(
     //     ctx: Context<RequestProof>,

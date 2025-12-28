@@ -2,19 +2,12 @@ import * as anchor from "@coral-xyz/anchor";
 import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
 import { PinataSDK } from "pinata";
 import fs from "node:fs";
-import crypto from "node:crypto";
 import { describe, expect, it } from "bun:test";
+
+import { decryptDocumentAndSave, encryptAndUploadDocument } from "./helpers";
 
 import idl from "../target/idl/vault_program.json";
 import type { VaultProgram } from "../target/types/vault_program";
-import {
-  createCommitment,
-  decryptDocKey,
-  decryptFile,
-  deriveMasterKey,
-  encryptDocKey,
-  encryptFile,
-} from "./utils";
 
 describe("vault program", () => {
   const provider = anchor.AnchorProvider.env();
@@ -30,6 +23,13 @@ describe("vault program", () => {
   const pinataJwtToken = process.env.PINATA_JWT_TOKEN;
   const pinataGateway = process.env.PINATA_GATEWAY;
 
+  if (!pinataJwtToken) {
+    throw new Error("missing pinata jwt token in env vars");
+  }
+  if (!pinataGateway) {
+    throw new Error("missing pinata gateway url in env vars");
+  }
+
   const pinata = new PinataSDK({
     pinataJwt: pinataJwtToken,
     pinataGateway: pinataGateway,
@@ -41,12 +41,6 @@ describe("vault program", () => {
     program.programId,
   )[0];
   const vaultName = "test";
-
-  const documentId = crypto.randomBytes(32);
-  const document = PublicKey.findProgramAddressSync(
-    [Buffer.from("document"), wallet.publicKey.toBuffer(), documentId],
-    program.programId,
-  )[0];
 
   it("create vault", async () => {
     const sig = await program.methods
@@ -70,79 +64,61 @@ describe("vault program", () => {
     expect(vaultAccountState.name).toBe(vaultName);
   });
 
-  it("upload document", async () => {
-    const fileBuffer = fs.readFileSync("./tests/test.txt");
-
-    const kMaster = deriveMasterKey(vault, wallet.secretKey);
-    const kDoc = crypto.randomBytes(32);
-    const encryptedFileBuffer = encryptFile(fileBuffer, kDoc);
-    const {
-      encrypted: encryptedKDoc,
-      nonce,
-      authTag,
-    } = encryptDocKey(kDoc, kMaster, vault);
-
-    const blob = new Blob([encryptedFileBuffer]);
-    const file = new File([blob], "test.enc", {
-      type: "application/octet-stream",
+  it("clear previous decryptions", async () => {
+    fs.rmSync("tests/assets/decrypted", {
+      recursive: true,
     });
 
-    const { cid } = await pinata.upload.public.file(file);
-    console.log(`uploaded encrypted file to pinata - ${pinataGateway}/${cid}`);
-
-    const commitment = createCommitment(kDoc, cid, nonce, authTag);
-
-    const sig = await program.methods
-      .uploadDocument(
-        Array.from(documentId),
-        Array.from(commitment),
-        cid,
-        Array.from(encryptedKDoc),
-        Array.from(nonce),
-        Array.from(authTag),
-      )
-      .accountsPartial({
-        document,
-        user: wallet.publicKey,
-        systemProgram: SystemProgram.programId,
-      })
-      .signers([wallet])
-      .rpc();
-
-    console.log(`upload sig - ${sig}`);
-
-    const documentState = await program.account.document.fetch(document);
-
-    expect(documentState.ipfsCid).toBe(cid);
-    expect(Buffer.from(documentState.commitment)).toEqual(commitment);
-    expect(Buffer.from(documentState.encryptedKdoc)).toEqual(encryptedKDoc);
-    expect(documentState.isVerified).toBe(true);
+    fs.mkdirSync("tests/assets/decrypted");
   });
 
-  it("decrypt document", async () => {
-    const documentState = await program.account.document.fetch(document);
-    const ipfsCid = documentState.ipfsCid;
-    const encryptedKDoc = Buffer.from(documentState.encryptedKdoc);
-    const nonce = Buffer.from(documentState.kdocNonce);
-    const authTag = Buffer.from(documentState.kdocAuthTag);
-    const commitment = Buffer.from(documentState.commitment);
+  it("upload and decrypt test.txt", async () => {
+    const fileBuffer = fs.readFileSync("./tests/assets/original/test.txt");
+    const outFilePath = "./tests/assets/decrypted/test.txt";
 
-    const fileResponse = await fetch(`${pinataGateway}/ipfs/${ipfsCid}`);
-    const encryptedFileBuffer = Buffer.from(await fileResponse.arrayBuffer());
-
-    const kMaster = deriveMasterKey(vault, wallet.secretKey);
-    const kDoc = decryptDocKey(encryptedKDoc, nonce, authTag, kMaster, vault);
-
-    const recomputedCommitment = createCommitment(
-      kDoc,
-      ipfsCid,
-      nonce,
-      authTag,
+    const { document } = await encryptAndUploadDocument(
+      program,
+      fileBuffer,
+      pinata,
+      vault,
+      wallet,
+      pinataGateway,
     );
-    expect(recomputedCommitment).toEqual(commitment);
 
-    const decryptedFileBuffer = decryptFile(encryptedFileBuffer, kDoc);
+    const decryptedFileBuffer = await decryptDocumentAndSave(
+      program,
+      document,
+      pinataGateway,
+      vault,
+      wallet,
+      outFilePath,
+    );
 
-    console.log(decryptedFileBuffer.toString());
+    expect(decryptedFileBuffer.toString()).toBe(fileBuffer.toString());
+  });
+
+  it("upload and decrypt cat.jpg", async () => {
+    const fileBuffer = fs.readFileSync("./tests/assets/original/cat.jpg");
+    const outFilePath = "./tests/assets/decrypted/cat.jpg";
+
+    const { document } = await encryptAndUploadDocument(
+      program,
+      fileBuffer,
+      pinata,
+      vault,
+      wallet,
+      pinataGateway,
+    );
+
+    const decryptedFileBuffer = await decryptDocumentAndSave(
+      program,
+      document,
+      pinataGateway,
+      vault,
+      wallet,
+      outFilePath,
+    );
+
+    expect(decryptedFileBuffer.toString()).toBe(fileBuffer.toString());
   });
 });
