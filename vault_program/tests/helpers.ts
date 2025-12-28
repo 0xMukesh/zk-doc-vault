@@ -18,6 +18,7 @@ import { VaultProgram } from "../target/types/vault_program";
 export const encryptAndUploadDocument = async (
   program: Program<VaultProgram>,
   fileBuffer: Buffer,
+  fileName: string,
   pinata: PinataSDK,
   vault: PublicKey,
   wallet: Keypair,
@@ -39,7 +40,7 @@ export const encryptAndUploadDocument = async (
   } = encryptDocKey(kDoc, kMaster, vault);
 
   const blob = new Blob([encryptedFileBuffer]);
-  const file = new File([blob], "test.enc", {
+  const file = new File([blob], fileName, {
     type: "application/octet-stream",
   });
 
@@ -59,6 +60,7 @@ export const encryptAndUploadDocument = async (
     )
     .accountsPartial({
       document,
+      vault: vault,
       user: wallet.publicKey,
       systemProgram: SystemProgram.programId,
     })
@@ -109,4 +111,33 @@ export const decryptDocumentAndSave = async (
   fs.writeFileSync(outFilePath, decryptedFileBuffer);
 
   return decryptedFileBuffer;
+};
+
+export const fetchAllUserDocuments = async (
+  pinata: PinataSDK,
+  program: Program<VaultProgram>,
+  wallet: Keypair,
+) => {
+  const files = await pinata.files.public.list();
+  const documents = await program.account.document.all([
+    {
+      memcmp: {
+        offset: 8,
+        bytes: wallet.publicKey.toBase58(),
+      },
+    },
+  ]);
+
+  console.log(
+    `found ${documents.length} documents for user ${wallet.publicKey.toString()}`,
+  );
+
+  for (const [i, doc] of documents.entries()) {
+    const file = files.files.find((v) => v.cid === doc.account.ipfsCid);
+    if (!file) {
+      return;
+    }
+
+    console.log(`${i + 1} ${file.name}`);
+  }
 };

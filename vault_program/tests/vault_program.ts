@@ -4,7 +4,11 @@ import { PinataSDK } from "pinata";
 import fs from "node:fs";
 import { describe, expect, it } from "bun:test";
 
-import { decryptDocumentAndSave, encryptAndUploadDocument } from "./helpers";
+import {
+  decryptDocumentAndSave,
+  encryptAndUploadDocument,
+  fetchAllUserDocuments,
+} from "./helpers";
 
 import idl from "../target/idl/vault_program.json";
 import type { VaultProgram } from "../target/types/vault_program";
@@ -42,6 +46,8 @@ describe("vault program", () => {
   )[0];
   const vaultName = "test";
 
+  let catJpgDocument: PublicKey | null = null;
+
   it("create vault", async () => {
     const sig = await program.methods
       .createUserVault(vaultId, vaultName)
@@ -72,53 +78,68 @@ describe("vault program", () => {
     fs.mkdirSync("tests/assets/decrypted");
   });
 
-  it("upload and decrypt test.txt", async () => {
-    const fileBuffer = fs.readFileSync("./tests/assets/original/test.txt");
-    const outFilePath = "./tests/assets/decrypted/test.txt";
+  it("upload and decrypt", async () => {
+    const dir = "./tests/assets/original";
+    const files = fs.readdirSync(dir);
 
-    const { document } = await encryptAndUploadDocument(
-      program,
-      fileBuffer,
-      pinata,
-      vault,
-      wallet,
-      pinataGateway,
-    );
+    for (const file of files) {
+      const fileBuffer = fs.readFileSync(`${dir}/${file}`);
+      const outFilePath = `${dir}/${file}`;
 
-    const decryptedFileBuffer = await decryptDocumentAndSave(
-      program,
-      document,
-      pinataGateway,
-      vault,
-      wallet,
-      outFilePath,
-    );
+      const { document } = await encryptAndUploadDocument(
+        program,
+        fileBuffer,
+        file,
+        pinata,
+        vault,
+        wallet,
+        pinataGateway,
+      );
 
-    expect(decryptedFileBuffer.toString()).toBe(fileBuffer.toString());
+      if (file === "cat.jpg") {
+        catJpgDocument = document;
+      }
+
+      const decryptedFileBuffer = await decryptDocumentAndSave(
+        program,
+        document,
+        pinataGateway,
+        vault,
+        wallet,
+        outFilePath,
+      );
+
+      expect(decryptedFileBuffer.toString()).toBe(fileBuffer.toString());
+    }
   });
 
-  it("upload and decrypt cat.jpg", async () => {
-    const fileBuffer = fs.readFileSync("./tests/assets/original/cat.jpg");
-    const outFilePath = "./tests/assets/decrypted/cat.jpg";
+  it("(pre delete) fetch all user documents", async () => {
+    await fetchAllUserDocuments(pinata, program, wallet);
+  });
 
-    const { document } = await encryptAndUploadDocument(
-      program,
-      fileBuffer,
-      pinata,
-      vault,
-      wallet,
-      pinataGateway,
-    );
+  it("delete cat.jpg document", async () => {
+    if (!catJpgDocument) {
+      throw new Error("missing cat.jpg document pda");
+    }
 
-    const decryptedFileBuffer = await decryptDocumentAndSave(
-      program,
-      document,
-      pinataGateway,
-      vault,
-      wallet,
-      outFilePath,
-    );
+    const sig = await program.methods
+      .deleteDocument()
+      .accountsPartial({
+        document: catJpgDocument,
+        user: wallet.publicKey,
+      })
+      .signers([wallet])
+      .rpc();
 
-    expect(decryptedFileBuffer.toString()).toBe(fileBuffer.toString());
+    console.log(`delete cat.jpg sig - ${sig}`);
+
+    const catJpgDocumentAccountState =
+      await program.account.document.fetchNullable(catJpgDocument);
+
+    expect(catJpgDocumentAccountState).toBe(null);
+  });
+
+  it("(post delete) fetch all user documents", async () => {
+    await fetchAllUserDocuments(pinata, program, wallet);
   });
 });

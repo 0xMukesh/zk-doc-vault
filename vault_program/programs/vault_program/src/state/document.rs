@@ -6,6 +6,7 @@ use crate::constants::IPFS_CID_LEN;
 #[derive(InitSpace)]
 pub struct Document {
     pub user: Pubkey,
+    pub vault: Pubkey,
     pub document_id: [u8; 32],
     pub commitment: [u8; 32],
     #[max_len(IPFS_CID_LEN)]
