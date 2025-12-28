@@ -74,17 +74,17 @@ describe("vault program", () => {
     fs.rmSync("tests/assets/decrypted", {
       recursive: true,
     });
-
     fs.mkdirSync("tests/assets/decrypted");
   });
 
   it("upload and decrypt", async () => {
     const dir = "./tests/assets/original";
+    const decryptionDir = "./tests/assets/decrypted";
     const files = fs.readdirSync(dir);
 
     for (const file of files) {
       const fileBuffer = fs.readFileSync(`${dir}/${file}`);
-      const outFilePath = `${dir}/${file}`;
+      const outFilePath = `${decryptionDir}/${file}`;
 
       const { document } = await encryptAndUploadDocument(
         program,
